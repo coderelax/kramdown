@@ -28,6 +28,7 @@ module Kramdown
       PARAGRAPH_END = /#{LAZY_END}|#{DEFINITION_LIST_START}/
 
       # Parse the paragraph at the current location.
+      # The link elements are first parsed as paragraph and they added as a link to the children array.
       def parse_paragraph
         start_line_number = @src.current_line_number
         result = @src.scan(PARAGRAPH_MATCH)

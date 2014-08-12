@@ -63,6 +63,8 @@ module Kramdown
       # Dispatch the conversion of the element +el+ to a +convert_TYPE+ method using the +type+ of
       # the element.
       def convert(el, indent = -@indent)
+        # It's called by Kramdown::Document instance, to_{converter_name} method.
+        #   See method_missing definition on document.rb
         send(DISPATCHER[el.type], el, indent)
       end
 

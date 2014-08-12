@@ -21,6 +21,7 @@ module Kramdown
       LINK_DEFINITION_START = /^#{OPT_SPACE}\[([^\n\]]+)\]:[ \t]*(?:<(.*?)>|([^'"\n]*?\S[^'"\n]*?))[ \t]*?(?:\n?[ \t]*?(["'])(.+?)\4[ \t]*?)?\n/
 
       # Parse the link definition at the current location.
+      # The file upload link will be similar to this one.
       def parse_link_definition
         @src.pos += @src.matched_size
         link_id, link_url, link_title = normalize_link_id(@src[1]), @src[2] || @src[3], @src[5]
@@ -50,7 +51,10 @@ module Kramdown
       LINK_PAREN_STOP_RE = /(\()|(\))|\s(?=['"])/
       LINK_INLINE_ID_RE = /\s*?\[([^\]]+)?\]/
       LINK_INLINE_TITLE_RE = /\s*?(["'])(.+?)\1\s*?\)/m
+      # Let's try adding our special syntax here
       LINK_START = /!?\[(?=[^^])/
+      # LINK_START = /[!|@]?\[(?=[^^])/
+
 
       # Parse the link at the current scanner position. This method is used to parse normal links as
       # well as image links.
@@ -58,6 +62,7 @@ module Kramdown
         start_line_number = @src.current_line_number
         result = @src.scan(LINK_START)
         reset_pos = @src.pos
+
 
         link_type = (result =~ /^!/ ? :img : :a)
 

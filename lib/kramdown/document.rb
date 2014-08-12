@@ -104,6 +104,7 @@ module Kramdown
       parser = parser[0..0].upcase + parser[1..-1]
       try_require('parser', parser)
       if Parser.const_defined?(parser)
+        # This is the first step of the process. Parsed here.
         @root, @warnings = Parser.const_get(parser).parse(source, @options)
       else
         raise Kramdown::Error.new("kramdown has no parser to handle the specified input format: #{options[:input]}")
@@ -117,6 +118,7 @@ module Kramdown
     def method_missing(id, *attr, &block)
       if id.to_s =~ /^to_(\w+)$/ && (name = Utils.camelize($1)) &&
           try_require('converter', name) && Converter.const_defined?(name)
+        # This is the second step of the process. Converted here.
         output, warnings = Converter.const_get(name).convert(@root, @options)
         @warnings.concat(warnings)
         output
@@ -141,4 +143,3 @@ module Kramdown
   end
 
 end
-
