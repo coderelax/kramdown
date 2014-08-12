@@ -8,7 +8,9 @@ module Kramdown
 
       def initialize(source, options)
         super
+        # Two set of parsers available depending on the element's type.
         @span_parsers.unshift(:question_tags)
+        @block_parsers.unshift(:question_tags)
       end
 
       QUESTION_TAGS_START = /\[\[\[[\s\S]*?\]\]\]/
@@ -18,8 +20,7 @@ module Kramdown
         @src.pos += @src.matched_size
         # This gets wrapped in a block element (p tag) and is rendered as raw text.
         # What we need is to add a link element (a tag) so it functions as such
-        processed_content = process_questions(@src.matched)
-        @tree.children << processed_content
+        process_questions(@src.matched)
       end
       define_parser(:question_tags, QUESTION_TAGS_START, '\[\[\[')
 
@@ -32,15 +33,14 @@ module Kramdown
         splitted_raw_content = raw_content.split("\n")
         question = splitted_raw_content[0]
         answers = splitted_raw_content.slice(1..-1)
-        markup = []
-        markup << build_question(question)
-        markup << build_answers(answers)
-        return markup
+        @tree.children << build_question(question)
+        @tree.children << build_answers(answers)
       end
 
-      # FIXME: This needs to actually create a new element.
+      # FIXME: This is getting created correctly but is converting to an empty p element
       def build_question(question)
-        return Element.new(:raw, question)
+        el = Element.new(:p, question)
+        return el
       end
 
       def build_answers(answers)
@@ -50,11 +50,15 @@ module Kramdown
           # Need to mark the correct answer and add the 'right' value as an attribute
           if index = answer =~ /--/
             # Right answer found
-            input = "<input type='radio' value='right'>#{answer}</input>"
+            input = '<input type="radio" value="right">'
+            input << answer
+            input << '</input>'
           else
-            input = "<input type='radio'>#{answer}</input>"
+            input = '<input type="radio">'
+            input << answer
+            input << '</input>'
           end
-          list_element.children << Element.new(:raw, input)
+          list_element.children << Element.new(:raw, input, category: :block )
           ul.children << list_element
         end
         return ul
