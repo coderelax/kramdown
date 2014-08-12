@@ -13,11 +13,18 @@ module Kramdown
         super
       end
 
+      # FIXME: ul showing with no items
       def convert_li(el, indent)
-        "<li class='answer'>#{el.value}</li>"
+        output = "<li class='answer'>"
+        output << "#{convert_raw(el.children.first, indent)}"
+        output << "</li>"
+        binding.pry
+        # el.value
+        output
       end
 
       def convert_raw(el, indent)
+        binding.pry
         el.value
       end
 

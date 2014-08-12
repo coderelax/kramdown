@@ -18,7 +18,8 @@ module Kramdown
         @src.pos += @src.matched_size
         # This gets wrapped in a block element (p tag) and is rendered as raw text.
         # What we need is to add a link element (a tag) so it functions as such
-        @tree.children << process_questions(@src.matched)
+        processed_content = process_questions(@src.matched)
+        @tree.children << processed_content
       end
       define_parser(:question_tags, QUESTION_TAGS_START, '\[\[\[')
 
