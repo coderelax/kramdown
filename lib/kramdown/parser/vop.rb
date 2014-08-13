@@ -11,6 +11,7 @@ module Kramdown
         # Two set of parsers available depending on the element's type.
         @span_parsers.unshift(:question_tags)
         @block_parsers.unshift(:question_tags)
+        @question_digest = ''
       end
 
       QUESTION_TAGS_START = /\[\[\[[\s\S]*?\]\]\]/
@@ -27,9 +28,7 @@ module Kramdown
       private
 
       def process_questions(raw_content)
-        # Let's get rid of the question markup
         raw_content.gsub!(/\[\[\[/,'').gsub!(/\]\]\]/,'')
-        # The question and all the allowed answers need to be separated by a newline character
         splitted_raw_content = raw_content.split("\n")
         question = splitted_raw_content[0]
         answers = splitted_raw_content.slice(1..-1)
@@ -37,9 +36,10 @@ module Kramdown
         @tree.children << build_answers(answers)
       end
 
-      # FIXME: This is getting created correctly but is converting to an empty p element
       def build_question(question)
         el = Element.new(:raw, question)
+        # Using a question md5 digest to uniquify the questions
+        @question_digest = Digest::MD5.hexdigest(el.value)
         return el
       end
 
@@ -49,15 +49,20 @@ module Kramdown
           list_element = Element.new(:li)
           # Need to mark the correct answer and add the 'right' value as an attribute
           spanHolder = '<span class="answer"></span>'
+          inputName = @question_digest
           if index = answer =~ /--/
             answer.gsub!(/--/,'')
             # Right answer found
-            input = '<label><input type="radio" value="right" />'
+            input = '<label><input type="radio" value="right" name="'
+            input << "#{inputName}"
+            input << '" />'
             input << answer << spanHolder
             input << '</label>'
           else
             answer.gsub!(/-/,'')
-            input = '<label><input type="radio" />'
+            input = '<label><input type="radio"'' name="'
+            input << "#{inputName}"
+            input << '" />'
             input << answer << spanHolder
             input << '</label>'
           end
