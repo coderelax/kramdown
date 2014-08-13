@@ -39,24 +39,27 @@ module Kramdown
 
       # FIXME: This is getting created correctly but is converting to an empty p element
       def build_question(question)
-        el = Element.new(:p, question)
+        el = Element.new(:raw, question)
         return el
       end
 
       def build_answers(answers)
-        ul = Element.new(:ul)
+        ul = Element.new(:ul, '', {class: 'answers-set'})
         answers.each do |answer|
           list_element = Element.new(:li)
           # Need to mark the correct answer and add the 'right' value as an attribute
+          spanHolder = '<span class="answer"></span>'
           if index = answer =~ /--/
+            answer.gsub!(/--/,'')
             # Right answer found
-            input = '<input type="radio" value="right">'
-            input << answer
-            input << '</input>'
+            input = '<label><input type="radio" value="right" />'
+            input << answer << spanHolder
+            input << '</label>'
           else
-            input = '<input type="radio">'
-            input << answer
-            input << '</input>'
+            answer.gsub!(/-/,'')
+            input = '<label><input type="radio" />'
+            input << answer << spanHolder
+            input << '</label>'
           end
           list_element.children << Element.new(:raw, input, category: :block )
           ul.children << list_element
